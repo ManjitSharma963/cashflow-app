@@ -1,0 +1,121 @@
+.navigation-bar {
+  background: #ecf0f3;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 1rem 0;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.nav-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.nav-brand {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #2d3748;
+  text-decoration: none;
+  background: linear-gradient(145deg, #e6e9ef, #ffffff);
+  padding: 0.5rem 1rem;
+  border-radius: 15px;
+  box-shadow: 5px 5px 10px #c1c4cc, -5px -5px 10px #ffffff;
+  transition: all 0.3s ease;
+}
+
+.nav-brand:hover {
+  box-shadow: 3px 3px 6px #c1c4cc, -3px -3px 6px #ffffff;
+  transform: translateY(-2px);
+}
+
+.nav-links {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.quick-search-form {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.quick-search-input {
+  padding: 0.5rem 0.75rem;
+  border: none;
+  border-radius: 10px;
+  background: #ecf0f3;
+  box-shadow: inset 2px 2px 4px #c1c4cc, inset -2px -2px 4px #ffffff;
+  font-size: 0.85rem;
+  color: #2d3748;
+  width: 180px;
+  transition: all 0.3s ease;
+}
+
+.quick-search-input:focus {
+  outline: none;
+  box-shadow: inset 1px 1px 2px #c1c4cc, inset -1px -1px 2px #ffffff;
+}
+
+.quick-search-btn {
+  background: none;
+  border: none;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.quick-search-btn:hover {
+  background: #e2e8f0;
+  transform: scale(1.1);
+}
+
+.nav-link {
+  padding: 0.75rem 1.5rem;
+  text-decoration: none;
+  color: #4a5568;
+  font-weight: 600;
+  border-radius: 15px;
+  background: linear-gradient(145deg, #f0f2f5, #e6e9ef);
+  box-shadow: 5px 5px 10px #c1c4cc, -5px -5px 10px #ffffff;
+  transition: all 0.3s ease;
+}
+
+.nav-link:hover {
+  box-shadow: 3px 3px 6px #c1c4cc, -3px -3px 6px #ffffff;
+  transform: translateY(-2px);
+}
+
+.nav-link.active {
+  background: linear-gradient(145deg, #e6e9ef, #ffffff);
+  color: #2d3748;
+  box-shadow: inset 3px 3px 6px #c1c4cc, inset -3px -3px 6px #ffffff;
+}
+
+@media (max-width: 768px) {
+  .nav-container {
+    padding: 0 1rem;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .nav-brand {
+    font-size: 1.5rem;
+  }
+  
+  .nav-links {
+    gap: 0.5rem;
+  }
+  
+  .nav-link {
+    padding: 0.6rem 1.2rem;
+    font-size: 0.9rem;
+  }
+} 

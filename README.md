@@ -1,70 +1,171 @@
-# Getting Started with Create React App
+# Credit Ledger - Customer Credit Manager
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A modern ReactJS application for managing customer credits and transactions with a beautiful neuomorphic design.
 
-## Available Scripts
+## Features
 
-In the project directory, you can run:
+### 🏠 **Customer Management**
+- Add, edit, and delete customers
+- Store customer information (name, mobile, address)
+- **Mobile number as unique customer ID** for easy searching
+- Track total due amounts and last transaction dates
 
-### `npm start`
+### 💰 **Transaction Tracking**
+- Add transactions with dates, descriptions, and amounts
+- Mark transactions as paid or pending
+- Automatic calculation of outstanding amounts
+- **Quick search by mobile number** in navigation bar
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+### 📊 **Dashboard Overview**
+- Total customers count
+- Total outstanding amount
+- Total collected amount
+- Recent transactions
+- Quick action buttons
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+### 🎨 **Beautiful UI**
+- Light neuomorphic design with soft shadows
+- Rounded corners and clean typography
+- Responsive design for all devices
+- Smooth hover animations and transitions
 
-### `npm test`
+## Technology Stack
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+- **Frontend**: React 19 with Hooks
+- **Routing**: React Router DOM
+- **Styling**: Custom CSS with neuomorphic design
+- **Storage**: Local Storage for data persistence
+- **Build Tool**: Create React App
 
-### `npm run build`
+## Getting Started
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### Prerequisites
+- Node.js (version 14 or higher)
+- npm or yarn
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### Installation
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+1. Clone the repository:
+```bash
+git clone <repository-url>
+cd cashflow-app
+```
 
-### `npm run eject`
+2. Install dependencies:
+```bash
+npm install
+```
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+3. Start the development server:
+```bash
+npm start
+```
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+4. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+### Building for Production
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+```bash
+npm run build
+```
 
-## Learn More
+## App Structure
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+```
+src/
+├── components/
+│   ├── NavigationBar.js      # Top navigation with routing
+│   ├── CustomerList.js       # Main customer list page
+│   ├── CustomerDetail.js     # Individual customer view
+│   ├── CustomerModal.js      # Add/edit customer form
+│   ├── TransactionModal.js   # Add transaction form
+│   ├── Dashboard.js          # Overview dashboard
+│   └── *.css                 # Component-specific styles
+├── App.js                    # Main app component with routing
+├── App.css                   # Global styles and common components
+└── index.js                  # App entry point
+```
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+## Usage Guide
 
-### Code Splitting
+### Adding a Customer
+1. Navigate to the Customers page
+2. Click the "+ Add Customer" button
+3. Fill in the customer details (name and mobile are required)
+4. **Mobile number must be unique** - serves as customer ID
+5. Click "Save"
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+### Adding a Transaction
+1. Go to a customer's detail page
+2. Click "+ Add Transaction"
+3. Enter the transaction details (date, description, amount)
+4. Click "Save Transaction"
 
-### Analyzing the Bundle Size
+### Marking Transactions as Paid
+1. In the customer detail page, find a pending transaction
+2. Click "Mark as Paid" button
+3. The transaction status will update and total due will decrease
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+### Searching for Customers
+1. **Quick Search**: Use the search bar in the navigation to find customers by mobile number
+2. **Detailed Search**: On the Customers page, search by name or mobile number
+3. **Direct Access**: Navigate directly to a customer using their mobile number as the URL
 
-### Making a Progressive Web App
+### Viewing Dashboard
+1. Click "Dashboard" in the navigation
+2. View summary statistics and recent transactions
+3. Use quick action buttons for common tasks
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+## Design Features
 
-### Advanced Configuration
+### Neuomorphic Elements
+- **Soft Shadows**: Creates depth without harsh edges
+- **Rounded Corners**: Modern, friendly appearance
+- **Light Background**: Easy on the eyes (#ecf0f3)
+- **Subtle Gradients**: Adds dimension to buttons and cards
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+### Color Scheme
+- **Primary**: #2d3748 (Dark text)
+- **Secondary**: #4a5568 (Medium text)
+- **Accent**: #3182ce (Links and highlights)
+- **Success**: #38a169 (Paid amounts)
+- **Warning**: #e53e3e (Outstanding amounts)
 
-### Deployment
+### Responsive Design
+- Mobile-first approach
+- Flexible grid layouts
+- Adaptive typography
+- Touch-friendly buttons and inputs
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+## Data Storage
 
-### `npm run build` fails to minify
+The app uses browser localStorage to persist data:
+- Customer information
+- Transaction records
+- Automatic data saving on changes
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+## Future Enhancements
+
+- [ ] Customer search and filtering
+- [ ] Export data to CSV/PDF
+- [ ] Multiple currency support
+- [ ] Payment reminders
+- [ ] Advanced reporting
+- [ ] User authentication
+- [ ] Cloud data synchronization
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
+
+## License
+
+This project is open source and available under the [MIT License](LICENSE).
+
+## Support
+
+For questions or support, please open an issue in the repository.
