@@ -48,22 +48,12 @@ const CustomerDetail = ({ customers, transactions, onAddTransaction, onMarkAsPai
   };
 
   const handleSavePayment = (paymentData) => {
-    // Create a payment record
-    const paymentRecord = {
-      id: Date.now().toString(),
-      date: paymentData.date,
-      amount: paymentData.amount,
-      paymentMethod: paymentData.paymentMethod,
-      notes: paymentData.notes,
-      type: 'Payment',
-      status: 'Completed'
-    };
-
-    // Add payment to transactions
-    onAddTransaction(id, paymentRecord);
+    // The PaymentModal now handles the API call directly and returns enhanced data
+    // Just pass the payment data to the parent component
+    onAddTransaction(id, paymentData);
 
     // If specific transactions were selected, mark them as paid
-    if (paymentData.selectedTransactions.length > 0) {
+    if (paymentData.selectedTransactions && paymentData.selectedTransactions.length > 0) {
       paymentData.selectedTransactions.forEach(transactionId => {
         onMarkAsPaid(id, transactionId);
       });

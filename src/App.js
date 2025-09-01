@@ -5,120 +5,218 @@ import CustomerList from './components/CustomerList';
 import CustomerDetail from './components/CustomerDetail';
 import Dashboard from './components/Dashboard';
 import Settings from './components/Settings';
+import { customerAPI, transactionAPI } from './services/api';
 import './App.css';
 
 function App() {
   const [customers, setCustomers] = useState([]);
   const [transactions, setTransactions] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Load data from localStorage on component mount
+  // Load customers from API on component mount
   useEffect(() => {
-    const savedCustomers = localStorage.getItem('customers');
-    const savedTransactions = localStorage.getItem('transactions');
-    
-    if (savedCustomers) {
-      setCustomers(JSON.parse(savedCustomers));
-    }
-    
-    if (savedTransactions) {
-      setTransactions(JSON.parse(savedTransactions));
-    }
+    loadCustomers();
   }, []);
 
-  // Save data to localStorage whenever data changes
-  useEffect(() => {
-    localStorage.setItem('customers', JSON.stringify(customers));
-  }, [customers]);
-
-  useEffect(() => {
-    localStorage.setItem('transactions', JSON.stringify(transactions));
-  }, [transactions]);
-
-  const addCustomer = (customer) => {
-    // Check if customer with this mobile number already exists
-    if (customers.find(c => c.mobile === customer.mobile)) {
-      alert('A customer with this mobile number already exists!');
-      return;
-    }
-    
-    const newCustomer = {
-      ...customer,
-      id: customer.mobile, // Use mobile number as ID
-      totalDue: 0,
-      lastTransactionDate: null
-    };
-    setCustomers([...customers, newCustomer]);
-    setTransactions(prev => ({
-      ...prev,
-      [newCustomer.id]: []
-    }));
-  };
-
-  const updateCustomer = (id, updatedCustomer) => {
-    setCustomers(customers.map(customer => 
-      customer.id === id ? { ...customer, ...updatedCustomer } : customer
-    ));
-  };
-
-  const deleteCustomer = (id) => {
-    setCustomers(customers.filter(customer => customer.id !== id));
-    const newTransactions = { ...transactions };
-    delete newTransactions[id];
-    setTransactions(newTransactions);
-  };
-
-  const addTransaction = (customerId, transaction) => {
-    const newTransaction = {
-      ...transaction,
-      id: Date.now().toString(),
-      status: transaction.type === 'Payment' ? 'Completed' : 'Pending'
-    };
-    
-    setTransactions(prev => ({
-      ...prev,
-      [customerId]: [...(prev[customerId] || []), newTransaction]
-    }));
-
-    // Update customer's total due and last transaction date
-    const customer = customers.find(c => c.id === customerId);
-    if (customer) {
-      let newTotalDue = customer.totalDue;
+  const loadCustomers = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const customersData = await customerAPI.getAllCustomers();
+      setCustomers(customersData);
       
-      if (transaction.type === 'Payment') {
-        // For payments, reduce the total due
-        newTotalDue = Math.max(0, customer.totalDue - parseFloat(transaction.amount));
-      } else {
-        // For regular transactions, add to total due
-        newTotalDue = customer.totalDue + parseFloat(transaction.amount);
-      }
-      
-      updateCustomer(customerId, {
-        totalDue: newTotalDue,
-        lastTransactionDate: transaction.date
+      // Initialize transactions for each customer
+      const transactionsData = {};
+      customersData.forEach(customer => {
+        transactionsData[customer.id] = [];
       });
+      setTransactions(transactionsData);
+    } catch (err) {
+      setError('Failed to load customers. Please check your API connection.');
+      console.error('Error loading customers:', err);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const markAsPaid = (customerId, transactionId) => {
-    setTransactions(prev => ({
-      ...prev,
-      [customerId]: prev[customerId].map(transaction =>
-        transaction.id === transactionId
-          ? { ...transaction, status: 'Paid' }
-          : transaction
-      )
-    }));
-
-    // Update customer's total due
-    const transaction = transactions[customerId]?.find(t => t.id === transactionId);
-    if (transaction) {
-      const customer = customers.find(c => c.id === customerId);
-      if (customer) {
-        const newTotalDue = Math.max(0, customer.totalDue - parseFloat(transaction.amount));
-        updateCustomer(customerId, { totalDue: newTotalDue });
+  const addCustomer = async (customer) => {
+    try {
+      // Check if customer with this mobile number already exists
+      if (customers.find(c => c.mobile === customer.mobile)) {
+        alert('A customer with this mobile number already exists!');
+        return;
       }
+      
+      const newCustomer = await customerAPI.createCustomer(customer);
+      setCustomers([...customers, newCustomer]);
+      setTransactions(prev => ({
+        ...prev,
+        [newCustomer.id]: []
+      }));
+    } catch (err) {
+      alert('Failed to create customer. Please try again.');
+      console.error('Error creating customer:', err);
     }
   };
+
+  const updateCustomer = async (id, updatedCustomer) => {
+    try {
+      const updatedCustomerData = await customerAPI.updateCustomer(id, updatedCustomer);
+      setCustomers(customers.map(customer => 
+        customer.id === id ? updatedCustomerData : customer
+      ));
+    } catch (err) {
+      alert('Failed to update customer. Please try again.');
+      console.error('Error updating customer:', err);
+    }
+  };
+
+  const deleteCustomer = async (id) => {
+    try {
+      await customerAPI.deleteCustomer(id);
+      setCustomers(customers.filter(customer => customer.id !== id));
+      const newTransactions = { ...transactions };
+      delete newTransactions[id];
+      setTransactions(newTransactions);
+    } catch (err) {
+      alert('Failed to delete customer. Please try again.');
+      console.error('Error deleting customer:', err);
+    }
+  };
+
+  const addTransaction = async (customerId, transaction) => {
+    try {
+      const customer = customers.find(c => c.id === customerId);
+      if (!customer) {
+        throw new Error('Customer not found');
+      }
+
+      if (transaction.type === 'Payment') {
+        // Use the enhanced processPayment method
+        const paymentResult = await transactionAPI.processPayment({
+          customerId: customerId,
+          customerName: customer.name,
+          amount: parseFloat(transaction.amount),
+          description: transaction.description || 'Payment received',
+          date: transaction.date,
+          paymentMethod: transaction.paymentMethod || 'CASH',
+          notes: transaction.notes || ''
+        });
+
+        // Add transaction to local state
+        setTransactions(prev => ({
+          ...prev,
+          [customerId]: [...(prev[customerId] || []), {
+            ...paymentResult.transaction,
+            id: paymentResult.transaction.id || Date.now().toString(),
+            type: 'Payment',
+            status: 'Completed'
+          }]
+        }));
+
+        // Update customer in local state with new balance
+        setCustomers(customers.map(c => 
+          c.id === customerId 
+            ? { ...c, totalDue: paymentResult.newBalance, lastTransactionDate: transaction.date }
+            : c
+        ));
+
+      } else {
+        // Use the enhanced addCredit method for regular transactions
+        const creditResult = await transactionAPI.addCredit({
+          customerId: customerId,
+          customerName: customer.name,
+          amount: parseFloat(transaction.amount),
+          description: transaction.description,
+          date: transaction.date,
+          status: 'PENDING',
+          paymentMethod: transaction.paymentMethod || 'CASH',
+          notes: transaction.notes || ''
+        });
+
+        // Add transaction to local state
+        setTransactions(prev => ({
+          ...prev,
+          [customerId]: [...(prev[customerId] || []), {
+            ...creditResult.transaction,
+            id: creditResult.transaction.id || Date.now().toString(),
+            type: transaction.type,
+            status: 'Pending'
+          }]
+        }));
+
+        // Update customer in local state with new balance
+        setCustomers(customers.map(c => 
+          c.id === customerId 
+            ? { ...c, totalDue: creditResult.newBalance, lastTransactionDate: transaction.date }
+            : c
+        ));
+      }
+    } catch (err) {
+      alert('Failed to add transaction. Please try again.');
+      console.error('Error adding transaction:', err);
+    }
+  };
+
+  const markAsPaid = async (customerId, transactionId) => {
+    try {
+      // Mark transaction as completed via API
+      await transactionAPI.markTransactionStatus(transactionId, 'COMPLETED');
+
+      // Update local transaction state
+      setTransactions(prev => ({
+        ...prev,
+        [customerId]: prev[customerId].map(transaction =>
+          transaction.id === transactionId
+            ? { ...transaction, status: 'Paid' }
+            : transaction
+        )
+      }));
+
+      // Get the transaction amount to update customer balance
+      const transaction = transactions[customerId]?.find(t => t.id === transactionId);
+      if (transaction) {
+        const customer = customers.find(c => c.id === customerId);
+        if (customer) {
+          const newTotalDue = Math.max(0, customer.totalDue - parseFloat(transaction.amount));
+          
+          // Update customer balance via API
+          await customerAPI.updateCustomerTotalDue(customerId, newTotalDue);
+          
+          // Update local customer state
+          setCustomers(customers.map(c => 
+            c.id === customerId ? { ...c, totalDue: newTotalDue } : c
+          ));
+        }
+      }
+    } catch (err) {
+      alert('Failed to mark transaction as paid. Please try again.');
+      console.error('Error marking transaction as paid:', err);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="loading-container">
+        <div className="loading-spinner">Loading...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="error-container">
+        <div className="error-message">
+          <h2>Error</h2>
+          <p>{error}</p>
+          <button onClick={loadCustomers} className="retry-btn">
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <Router>

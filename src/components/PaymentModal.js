@@ -1,27 +1,30 @@
 import React, { useState, useEffect } from 'react';
+import { transactionAPI } from '../services/api';
 import './PaymentModal.css';
 
 const PaymentModal = ({ isOpen, onClose, onSave, customer, transactions }) => {
   const [paymentData, setPaymentData] = useState({
     date: new Date().toISOString().split('T')[0],
     amount: '',
-    paymentMethod: 'Cash',
+    paymentMethod: 'CASH',
     notes: ''
   });
 
   const [selectedTransactions, setSelectedTransactions] = useState([]);
   const [paymentType, setPaymentType] = useState('partial'); // 'partial' or 'lump'
+  const [processing, setProcessing] = useState(false);
 
   useEffect(() => {
     if (isOpen && customer) {
       setPaymentData({
         date: new Date().toISOString().split('T')[0],
         amount: '',
-        paymentMethod: 'Cash',
+        paymentMethod: 'CASH',
         notes: ''
       });
       setSelectedTransactions([]);
       setPaymentType('partial');
+      setProcessing(false);
     }
   }, [isOpen, customer]);
 
@@ -51,7 +54,7 @@ const PaymentModal = ({ isOpen, onClose, onSave, customer, transactions }) => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
     if (!paymentData.amount.trim()) {
@@ -70,13 +73,40 @@ const PaymentModal = ({ isOpen, onClose, onSave, customer, transactions }) => {
       return;
     }
 
-    onSave({
-      ...paymentData,
-      amount: paymentAmount,
-      selectedTransactions,
-      paymentType,
-      remainingAmount: customer.totalDue - paymentAmount
-    });
+    setProcessing(true);
+
+    try {
+      // Use the enhanced processPayment API method
+      const paymentResult = await transactionAPI.processPayment({
+        customerId: customer.id,
+        customerName: customer.name,
+        amount: paymentAmount,
+        description: `Payment received - ${paymentType === 'lump' ? 'Full payment' : 'Partial payment'}`,
+        date: paymentData.date,
+        paymentMethod: paymentData.paymentMethod,
+        notes: paymentData.notes
+      });
+
+      // Call the parent component's onSave with enhanced payment data
+      onSave({
+        ...paymentData,
+        amount: paymentAmount,
+        selectedTransactions,
+        paymentType,
+        remainingAmount: paymentResult.newBalance,
+        previousBalance: paymentResult.previousBalance,
+        transactionId: paymentResult.transaction.id,
+        type: 'Payment'
+      });
+
+      // Close modal
+      onClose();
+    } catch (error) {
+      console.error('Error processing payment:', error);
+      alert('Failed to process payment. Please try again.');
+    } finally {
+      setProcessing(false);
+    }
   };
 
   if (!isOpen || !customer) return null;
@@ -173,12 +203,12 @@ const PaymentModal = ({ isOpen, onClose, onSave, customer, transactions }) => {
                 onChange={handleInputChange}
                 className="form-select"
               >
-                <option value="Cash">Cash</option>
-                <option value="Bank Transfer">Bank Transfer</option>
+                <option value="CASH">Cash</option>
+                <option value="BANK_TRANSFER">Bank Transfer</option>
                 <option value="UPI">UPI</option>
-                <option value="Cheque">Cheque</option>
-                <option value="Card">Card</option>
-                <option value="Other">Other</option>
+                <option value="CHEQUE">Cheque</option>
+                <option value="CARD">Card</option>
+                <option value="OTHER">Other</option>
               </select>
             </div>
 
@@ -245,8 +275,8 @@ const PaymentModal = ({ isOpen, onClose, onSave, customer, transactions }) => {
             <button type="button" className="btn-secondary" onClick={onClose}>
               Cancel
             </button>
-            <button type="submit" className="btn-primary">
-              Process Payment
+            <button type="submit" className="btn-primary" disabled={processing}>
+              {processing ? 'Processing...' : 'Process Payment'}
             </button>
           </div>
         </form>
