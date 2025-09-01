@@ -1,0 +1,253 @@
+.payment-modal {
+  max-width: 600px;
+}
+
+.payment-summary {
+  background: linear-gradient(145deg, #f0f2f5, #e6e9ef);
+  border-radius: 15px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 5px 5px 10px #c1c4cc, -5px -5px 10px #ffffff;
+}
+
+.customer-info h3 {
+  color: #2d3748;
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.customer-mobile {
+  color: #718096;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.amount-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.total-outstanding,
+.pending-transactions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.total-outstanding .label,
+.pending-transactions .label {
+  font-size: 0.8rem;
+  color: #718096;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.total-outstanding .amount {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #e53e3e;
+  font-family: 'Courier New', monospace;
+}
+
+.pending-transactions .count {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #2d3748;
+}
+
+.payment-type-selector {
+  margin-bottom: 1.5rem;
+}
+
+.payment-type-selector label {
+  display: block;
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+  color: #4a5568;
+}
+
+.payment-type-buttons {
+  display: flex;
+  gap: 1rem;
+}
+
+.payment-type-btn {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border: none;
+  border-radius: 15px;
+  background: linear-gradient(145deg, #f0f2f5, #e6e9ef);
+  color: #4a5568;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 5px 5px 10px #c1c4cc, -5px -5px 10px #ffffff;
+  transition: all 0.3s ease;
+}
+
+.payment-type-btn.active {
+  background: linear-gradient(145deg, #e6e9ef, #ffffff);
+  color: #2d3748;
+  box-shadow: inset 3px 3px 6px #c1c4cc, inset -3px -3px 6px #ffffff;
+}
+
+.payment-type-btn:hover:not(.active) {
+  box-shadow: 3px 3px 6px #c1c4cc, -3px -3px 6px #ffffff;
+  transform: translateY(-2px);
+}
+
+.amount-hint {
+  font-size: 0.8rem;
+  color: #718096;
+  margin-top: 0.25rem;
+  font-style: italic;
+}
+
+.transaction-selection {
+  margin-bottom: 1.5rem;
+}
+
+.transaction-selection label {
+  display: block;
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+  color: #4a5568;
+}
+
+.transactions-list {
+  max-height: 200px;
+  overflow-y: auto;
+  background: linear-gradient(145deg, #f0f2f5, #e6e9ef);
+  border-radius: 15px;
+  padding: 1rem;
+  box-shadow: inset 3px 3px 6px #c1c4cc, inset -3px -3px 6px #ffffff;
+}
+
+.transaction-item {
+  margin-bottom: 0.75rem;
+}
+
+.transaction-item:last-child {
+  margin-bottom: 0;
+}
+
+.transaction-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 10px;
+  transition: all 0.3s ease;
+}
+
+.transaction-checkbox:hover {
+  background: linear-gradient(145deg, #e6e9ef, #ffffff);
+}
+
+.transaction-checkbox input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: #3182ce;
+}
+
+.transaction-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1;
+}
+
+.transaction-date {
+  font-size: 0.8rem;
+  color: #718096;
+}
+
+.transaction-description {
+  font-weight: 600;
+  color: #2d3748;
+  font-size: 0.9rem;
+}
+
+.transaction-amount {
+  font-weight: 700;
+  color: #e53e3e;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9rem;
+}
+
+.selection-hint {
+  font-size: 0.8rem;
+  color: #718096;
+  margin-top: 0.5rem;
+  text-align: center;
+  font-style: italic;
+}
+
+.payment-preview {
+  background: linear-gradient(145deg, #f0f2f5, #e6e9ef);
+  border-radius: 15px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 5px 5px 10px #c1c4cc, -5px -5px 10px #ffffff;
+}
+
+.preview-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.preview-item:last-child {
+  margin-bottom: 0;
+}
+
+.preview-item .label {
+  font-weight: 600;
+  color: #4a5568;
+  font-size: 0.9rem;
+}
+
+.preview-item .value {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: #2d3748;
+  font-family: 'Courier New', monospace;
+}
+
+.preview-item .value.remaining {
+  color: #e53e3e;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .payment-modal {
+    margin: 1rem;
+    max-height: 90vh;
+  }
+  
+  .amount-info {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+  
+  .payment-type-buttons {
+    flex-direction: column;
+  }
+  
+  .transactions-list {
+    max-height: 150px;
+  }
+  
+  .transaction-info {
+    font-size: 0.85rem;
+  }
+} 

@@ -64,6 +64,17 @@ body {
   transform: translateY(-2px);
 }
 
+.btn-success {
+  background: linear-gradient(145deg, #c6f6d5, #9ae6b4);
+  color: #2f855a;
+  box-shadow: 5px 5px 10px #c1c4cc, -5px -5px 10px #ffffff;
+}
+
+.btn-success:hover {
+  box-shadow: 3px 3px 6px #c1c4cc, -3px -3px 6px #ffffff;
+  transform: translateY(-2px);
+}
+
 /* Common card styles */
 .card {
   background: #ecf0f3;

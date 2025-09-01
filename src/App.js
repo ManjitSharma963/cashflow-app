@@ -4,6 +4,7 @@ import NavigationBar from './components/NavigationBar';
 import CustomerList from './components/CustomerList';
 import CustomerDetail from './components/CustomerDetail';
 import Dashboard from './components/Dashboard';
+import Settings from './components/Settings';
 import './App.css';
 
 function App() {
@@ -70,7 +71,7 @@ function App() {
     const newTransaction = {
       ...transaction,
       id: Date.now().toString(),
-      status: 'Pending'
+      status: transaction.type === 'Payment' ? 'Completed' : 'Pending'
     };
     
     setTransactions(prev => ({
@@ -81,7 +82,16 @@ function App() {
     // Update customer's total due and last transaction date
     const customer = customers.find(c => c.id === customerId);
     if (customer) {
-      const newTotalDue = customer.totalDue + parseFloat(transaction.amount);
+      let newTotalDue = customer.totalDue;
+      
+      if (transaction.type === 'Payment') {
+        // For payments, reduce the total due
+        newTotalDue = Math.max(0, customer.totalDue - parseFloat(transaction.amount));
+      } else {
+        // For regular transactions, add to total due
+        newTotalDue = customer.totalDue + parseFloat(transaction.amount);
+      }
+      
       updateCustomer(customerId, {
         totalDue: newTotalDue,
         lastTransactionDate: transaction.date
@@ -148,6 +158,10 @@ function App() {
                   transactions={transactions}
                 />
               } 
+            />
+            <Route 
+              path="/settings" 
+              element={<Settings />} 
             />
           </Routes>
         </main>

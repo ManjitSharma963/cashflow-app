@@ -47,6 +47,12 @@ const NavigationBar = () => {
           >
             Dashboard
           </Link>
+          <Link 
+            to="/settings" 
+            className={`nav-link ${location.pathname === '/settings' ? 'active' : ''}`}
+          >
+            Settings
+          </Link>
         </div>
       </div>
     </nav>

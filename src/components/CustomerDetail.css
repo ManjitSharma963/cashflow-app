@@ -236,6 +236,41 @@
   color: #2f855a;
 }
 
+.transaction-status.payment {
+  background: linear-gradient(145deg, #bee3f8, #90cdf4);
+  color: #2c5aa0;
+}
+
+.transaction-card.payment {
+  border-left: 4px solid #3182ce;
+}
+
+.transaction-amount.payment {
+  color: #38a169;
+}
+
+.payment-method {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  background: linear-gradient(145deg, #f0f2f5, #e6e9ef);
+  border-radius: 10px;
+  font-size: 0.85rem;
+}
+
+.method-label {
+  color: #718096;
+  font-weight: 600;
+}
+
+.method-value {
+  color: #2d3748;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
 .transaction-content {
   display: flex;
   justify-content: space-between;

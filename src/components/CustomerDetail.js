@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import TransactionModal from './TransactionModal';
+import PaymentModal from './PaymentModal';
 import './CustomerDetail.css';
 
 const CustomerDetail = ({ customers, transactions, onAddTransaction, onMarkAsPaid, onUpdateCustomer }) => {
   const { id } = useParams();
   const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
 
   const customer = customers.find(c => c.id === id);
   const customerTransactions = transactions[id] || [];
@@ -41,6 +43,35 @@ const CustomerDetail = ({ customers, transactions, onAddTransaction, onMarkAsPai
     onMarkAsPaid(id, transactionId);
   };
 
+  const handleMakePayment = () => {
+    setIsPaymentModalOpen(true);
+  };
+
+  const handleSavePayment = (paymentData) => {
+    // Create a payment record
+    const paymentRecord = {
+      id: Date.now().toString(),
+      date: paymentData.date,
+      amount: paymentData.amount,
+      paymentMethod: paymentData.paymentMethod,
+      notes: paymentData.notes,
+      type: 'Payment',
+      status: 'Completed'
+    };
+
+    // Add payment to transactions
+    onAddTransaction(id, paymentRecord);
+
+    // If specific transactions were selected, mark them as paid
+    if (paymentData.selectedTransactions.length > 0) {
+      paymentData.selectedTransactions.forEach(transactionId => {
+        onMarkAsPaid(id, transactionId);
+      });
+    }
+
+    setIsPaymentModalOpen(false);
+  };
+
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString();
   };
@@ -63,6 +94,11 @@ const CustomerDetail = ({ customers, transactions, onAddTransaction, onMarkAsPai
           <button className="btn-secondary" onClick={handleEditCustomer}>
             Edit Customer
           </button>
+          {customer.totalDue > 0 && (
+            <button className="btn-success" onClick={handleMakePayment}>
+              💰 Make Payment
+            </button>
+          )}
           <button className="btn-primary" onClick={handleAddTransaction}>
             + Add Transaction
           </button>
@@ -126,18 +162,28 @@ const CustomerDetail = ({ customers, transactions, onAddTransaction, onMarkAsPai
         ) : (
           <div className="transactions-list">
             {customerTransactions.map(transaction => (
-              <div key={transaction.id} className={`transaction-card ${transaction.status.toLowerCase()}`}>
+              <div key={transaction.id} className={`transaction-card ${transaction.type === 'Payment' ? 'payment' : transaction.status.toLowerCase()}`}>
                 <div className="transaction-header">
                   <div className="transaction-date">{formatDate(transaction.date)}</div>
-                  <div className={`transaction-status ${transaction.status.toLowerCase()}`}>
-                    {transaction.status}
+                  <div className={`transaction-status ${transaction.type === 'Payment' ? 'payment' : transaction.status.toLowerCase()}`}>
+                    {transaction.type === 'Payment' ? 'Payment' : transaction.status}
                   </div>
                 </div>
                 <div className="transaction-content">
-                  <div className="transaction-description">{transaction.description}</div>
-                  <div className="transaction-amount">{formatCurrency(transaction.amount)}</div>
+                  <div className="transaction-description">
+                    {transaction.type === 'Payment' ? `Payment - ${transaction.notes || 'No notes'}` : transaction.description}
+                  </div>
+                  <div className={`transaction-amount ${transaction.type === 'Payment' ? 'payment' : transaction.status.toLowerCase()}`}>
+                    {transaction.type === 'Payment' ? `-${formatCurrency(transaction.amount)}` : formatCurrency(transaction.amount)}
+                  </div>
                 </div>
-                {transaction.status === 'Pending' && (
+                {transaction.type === 'Payment' && (
+                  <div className="payment-method">
+                    <span className="method-label">Method:</span>
+                    <span className="method-value">{transaction.paymentMethod}</span>
+                  </div>
+                )}
+                {transaction.status === 'Pending' && transaction.type !== 'Payment' && (
                   <div className="transaction-actions">
                     <button 
                       className="mark-paid-btn"
@@ -157,6 +203,14 @@ const CustomerDetail = ({ customers, transactions, onAddTransaction, onMarkAsPai
         isOpen={isTransactionModalOpen}
         onClose={() => setIsTransactionModalOpen(false)}
         onSave={handleSaveTransaction}
+      />
+
+      <PaymentModal
+        isOpen={isPaymentModalOpen}
+        onClose={() => setIsPaymentModalOpen(false)}
+        onSave={handleSavePayment}
+        customer={customer}
+        transactions={customerTransactions}
       />
     </div>
   );

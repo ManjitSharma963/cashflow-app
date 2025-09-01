@@ -66,6 +66,30 @@
   flex-direction: column;
 }
 
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.form-select {
+  width: 100%;
+  padding: 0.75rem;
+  border: none;
+  border-radius: 15px;
+  background: #ecf0f3;
+  box-shadow: inset 3px 3px 6px #c1c4cc, inset -3px -3px 6px #ffffff;
+  font-size: 0.9rem;
+  color: #2d3748;
+  transition: all 0.3s ease;
+}
+
+.form-select:focus {
+  outline: none;
+  box-shadow: inset 2px 2px 4px #c1c4cc, inset -2px -2px 4px #ffffff;
+}
+
 .modal-actions {
   display: flex;
   gap: 1rem;

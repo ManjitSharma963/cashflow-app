@@ -6,9 +6,11 @@ A modern ReactJS application for managing customer credits and transactions with
 
 ### 🏠 **Customer Management**
 - Add, edit, and delete customers
-- Store customer information (name, mobile, address)
+- Store customer information (name, mobile, address, category, notes)
 - **Mobile number as unique customer ID** for easy searching
+- **Customer categories** (Regular, VIP, Wholesale, Retail, etc.)
 - Track total due amounts and last transaction dates
+- **Advanced filtering and sorting** by status, category, and more
 
 ### 💰 **Transaction Tracking**
 - Add transactions with dates, descriptions, and amounts
@@ -17,17 +19,19 @@ A modern ReactJS application for managing customer credits and transactions with
 - **Quick search by mobile number** in navigation bar
 
 ### 📊 **Dashboard Overview**
-- Total customers count
-- Total outstanding amount
-- Total collected amount
-- Recent transactions
-- Quick action buttons
+- **Enhanced statistics** with collection rate and period selection
+- **Customer category breakdown** with visual charts
+- **Top outstanding customers** list
+- Recent transactions and quick action buttons
+- **Period-based analytics** (Week, Month, Year)
 
 ### 🎨 **Beautiful UI**
 - Light neuomorphic design with soft shadows
 - Rounded corners and clean typography
 - Responsive design for all devices
 - Smooth hover animations and transitions
+- **Enhanced visual elements** with progress bars and charts
+- **Interactive sorting and filtering** with visual feedback
 
 ## Technology Stack
 
@@ -74,12 +78,13 @@ npm run build
 ```
 src/
 ├── components/
-│   ├── NavigationBar.js      # Top navigation with routing
-│   ├── CustomerList.js       # Main customer list page
-│   ├── CustomerDetail.js     # Individual customer view
-│   ├── CustomerModal.js      # Add/edit customer form
+│   ├── NavigationBar.js      # Top navigation with routing & quick search
+│   ├── CustomerList.js       # Main customer list with advanced filters
+│   ├── CustomerDetail.js     # Individual customer view & transactions
+│   ├── CustomerModal.js      # Enhanced add/edit customer form
 │   ├── TransactionModal.js   # Add transaction form
-│   ├── Dashboard.js          # Overview dashboard
+│   ├── Dashboard.js          # Enhanced analytics dashboard
+│   ├── Settings.js           # App preferences & data management
 │   └── *.css                 # Component-specific styles
 ├── App.js                    # Main app component with routing
 ├── App.css                   # Global styles and common components
@@ -93,7 +98,8 @@ src/
 2. Click the "+ Add Customer" button
 3. Fill in the customer details (name and mobile are required)
 4. **Mobile number must be unique** - serves as customer ID
-5. Click "Save"
+5. **Add category and notes** for better organization
+6. Click "Save"
 
 ### Adding a Transaction
 1. Go to a customer's detail page
@@ -108,13 +114,23 @@ src/
 
 ### Searching for Customers
 1. **Quick Search**: Use the search bar in the navigation to find customers by mobile number
-2. **Detailed Search**: On the Customers page, search by name or mobile number
-3. **Direct Access**: Navigate directly to a customer using their mobile number as the URL
+2. **Advanced Filters**: Use the filter panel to search by status, category, and more
+3. **Sorting**: Click column headers to sort by name, mobile, amount, or date
+4. **Direct Access**: Navigate directly to a customer using their mobile number as the URL
 
 ### Viewing Dashboard
 1. Click "Dashboard" in the navigation
-2. View summary statistics and recent transactions
-3. Use quick action buttons for common tasks
+2. View enhanced statistics with collection rates and period selection
+3. **Analyze customer categories** with visual breakdown charts
+4. **Monitor top outstanding customers** and recent activity
+5. Use quick action buttons for common tasks
+
+### App Settings & Data Management
+1. Click "Settings" in the navigation
+2. **Configure preferences**: Currency, date format, default category
+3. **Data backup**: Export all data to JSON file for safekeeping
+4. **Data restore**: Import from previous backup files
+5. **Reset options**: Clear data or reset to default settings
 
 ## Design Features
 
@@ -146,13 +162,16 @@ The app uses browser localStorage to persist data:
 
 ## Future Enhancements
 
-- [ ] Customer search and filtering
-- [ ] Export data to CSV/PDF
-- [ ] Multiple currency support
-- [ ] Payment reminders
-- [ ] Advanced reporting
+- [x] ✅ **Customer search and filtering** - Advanced filters with status and category
+- [x] ✅ **Export data to JSON** - Full backup and restore functionality
+- [x] ✅ **Multiple currency support** - Configurable in settings
+- [x] ✅ **Advanced reporting** - Enhanced dashboard with analytics
+- [x] ✅ **Customer categories** - Organized customer management
+- [ ] Payment reminders and notifications
+- [ ] CSV/PDF export options
 - [ ] User authentication
 - [ ] Cloud data synchronization
+- [ ] Dark theme support
 
 ## Contributing
 
