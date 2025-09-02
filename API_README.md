@@ -5,6 +5,324 @@
 http://localhost:8080/api
 ```
 
+## Authentication API Endpoints
+
+### 1. User Registration
+**POST** `/auth/register`
+
+**Request Body:**
+```json
+{
+  "name": "John Doe",
+  "email": "john@example.com",
+  "password": "securepassword123",
+  "shopName": "John's General Store",
+  "mobile": "9876543210",
+  "address": "123 Main Street, City"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "User registered successfully",
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "user": {
+    "id": "user123",
+    "name": "John Doe",
+    "email": "john@example.com",
+    "shopName": "John's General Store",
+    "mobile": "9876543210",
+    "address": "123 Main Street, City",
+    "createdAt": "2024-01-15T10:30:00Z"
+  }
+}
+```
+
+**Example:**
+```bash
+curl -X POST "http://localhost:8080/api/auth/register" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "John Doe",
+    "email": "john@example.com",
+    "password": "securepassword123",
+    "shopName": "Johns General Store",
+    "mobile": "9876543210",
+    "address": "123 Main Street, City"
+  }'
+```
+
+### 2. User Login
+**POST** `/auth/login`
+
+**Request Body:**
+```json
+{
+  "email": "john@example.com",
+  "password": "securepassword123"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Login successful",
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "user": {
+    "id": "user123",
+    "name": "John Doe",
+    "email": "john@example.com",
+    "shopName": "John's General Store",
+    "mobile": "9876543210",
+    "address": "123 Main Street, City"
+  }
+}
+```
+
+**Example:**
+```bash
+curl -X POST "http://localhost:8080/api/auth/login" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "john@example.com",
+    "password": "securepassword123"
+  }'
+```
+
+### 3. Get User Profile
+**GET** `/auth/profile`
+
+**Headers:**
+```
+Authorization: Bearer <token>
+```
+
+**Response:**
+```json
+{
+  "id": "user123",
+  "name": "John Doe",
+  "email": "john@example.com",
+  "shopName": "John's General Store",
+  "mobile": "9876543210",
+  "address": "123 Main Street, City",
+  "createdAt": "2024-01-15T10:30:00Z",
+  "updatedAt": "2024-01-15T10:30:00Z"
+}
+```
+
+**Example:**
+```bash
+curl -X GET "http://localhost:8080/api/auth/profile" \
+  -H "Authorization: Bearer <your-token>"
+```
+
+### 4. Update User Profile
+**PUT** `/auth/profile`
+
+**Headers:**
+```
+Authorization: Bearer <token>
+```
+
+**Request Body:**
+```json
+{
+  "name": "John Doe Updated",
+  "shopName": "John's Updated Store",
+  "mobile": "9876543211",
+  "address": "456 New Street, City"
+}
+```
+
+**Example:**
+```bash
+curl -X PUT "http://localhost:8080/api/auth/profile" \
+  -H "Authorization: Bearer <your-token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "John Doe Updated",
+    "shopName": "Johns Updated Store",
+    "mobile": "9876543211",
+    "address": "456 New Street, City"
+  }'
+```
+
+### 5. Logout
+**POST** `/auth/logout`
+
+**Headers:**
+```
+Authorization: Bearer <token>
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Logged out successfully"
+}
+```
+
+**Example:**
+```bash
+curl -X POST "http://localhost:8080/api/auth/logout" \
+  -H "Authorization: Bearer <your-token>"
+```
+
+## Authentication Flow
+
+### 1. Registration Flow
+1. User fills registration form with shop details
+2. Frontend calls `/auth/register` endpoint
+3. Backend validates data and creates user account
+4. Backend returns JWT token and user data
+5. Frontend stores token in localStorage
+6. User is automatically logged in
+
+### 2. Login Flow
+1. User enters email and password
+2. Frontend calls `/auth/login` endpoint
+3. Backend validates credentials
+4. Backend returns JWT token and user data
+5. Frontend stores token in localStorage
+6. User gains access to protected routes
+
+### 3. Protected Routes
+All customer and transaction endpoints require authentication:
+- Include `Authorization: Bearer <token>` header in all requests
+- Token is automatically added by the frontend API service
+- Invalid/expired tokens return 401 Unauthorized
+
+### 4. Token Management
+- Tokens are stored in localStorage
+- Tokens should be included in all API requests
+- Frontend automatically handles token refresh
+- Logout clears token from localStorage
+
+## Error Responses
+
+### Authentication Errors
+```json
+{
+  "success": false,
+  "message": "Invalid credentials",
+  "error": "INVALID_CREDENTIALS"
+}
+```
+
+### Validation Errors
+```json
+{
+  "success": false,
+  "message": "Validation failed",
+  "errors": {
+    "email": "Email is required",
+    "password": "Password must be at least 6 characters"
+  }
+}
+```
+
+### Authorization Errors
+```json
+{
+  "success": false,
+  "message": "Access denied. Token required",
+  "error": "NO_TOKEN"
+}
+```
+
+## Frontend Integration
+
+### Using AuthContext
+```javascript
+import { useAuth } from '../contexts/AuthContext';
+
+function MyComponent() {
+  const { user, login, logout, isAuthenticated, loading } = useAuth();
+
+  const handleLogin = async (credentials) => {
+    try {
+      await login(credentials);
+      // User is now logged in
+    } catch (error) {
+      console.error('Login failed:', error.message);
+    }
+  };
+
+  if (loading) return <div>Loading...</div>;
+  if (!isAuthenticated) return <LoginForm onLogin={handleLogin} />;
+
+  return <div>Welcome, {user.name}!</div>;
+}
+```
+
+### API Calls with Authentication
+```javascript
+import { authAPI, customerAPI } from '../services/api';
+
+// Login
+const loginResult = await authAPI.login({
+  email: 'john@example.com',
+  password: 'password123'
+});
+
+// Get customers (automatically includes auth header)
+const customers = await customerAPI.getAllCustomers();
+
+// Update profile
+const updatedUser = await authAPI.updateProfile({
+  name: 'New Name',
+  shopName: 'New Shop Name'
+});
+
+// Logout
+await authAPI.logout();
+```
+
+## Security Features
+
+### Password Requirements
+- Minimum 6 characters
+- Frontend validation with user feedback
+- Backend validation and hashing
+
+### Token Security
+- JWT tokens with expiration
+- Secure token storage in localStorage
+- Automatic token cleanup on logout
+
+### Data Protection
+- All customer and transaction data is user-specific
+- API endpoints filter data by authenticated user
+- No cross-user data access
+
+### Input Validation
+- Email format validation
+- Mobile number format validation
+- Required field validation
+- XSS protection on all inputs
+
+## Multi-User Support
+
+### User Isolation
+- Each shopkeeper has their own customer database
+- Transactions are isolated per user
+- No data sharing between different shop accounts
+
+### Shop Management
+- Each user account represents one shop
+- Shop name displayed in navigation
+- User profile includes shop information
+
+### Scalability
+- Supports unlimited number of shopkeepers
+- Each shop can have unlimited customers
+- Efficient data querying with user-based filtering
+
 ## Transaction API Endpoints
 
 ### 1. Get All Transactions

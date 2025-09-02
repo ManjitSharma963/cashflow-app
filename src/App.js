@@ -1,23 +1,30 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 import NavigationBar from './components/NavigationBar';
 import CustomerList from './components/CustomerList';
 import CustomerDetail from './components/CustomerDetail';
 import Dashboard from './components/Dashboard';
 import Settings from './components/Settings';
+import AuthPage from './components/AuthPage';
+import ProtectedRoute from './components/ProtectedRoute';
 import { customerAPI, transactionAPI } from './services/api';
 import './App.css';
 
-function App() {
+// Main App Component (wrapped with AuthProvider)
+function AppContent() {
+  const { isAuthenticated, loading: authLoading, user } = useAuth();
   const [customers, setCustomers] = useState([]);
   const [transactions, setTransactions] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Load customers from API on component mount
+  // Load customers from API when user is authenticated
   useEffect(() => {
-    loadCustomers();
-  }, []);
+    if (isAuthenticated) {
+      loadCustomers();
+    }
+  }, [isAuthenticated]);
 
   const loadCustomers = async () => {
     try {
@@ -33,7 +40,7 @@ function App() {
       });
       setTransactions(transactionsData);
     } catch (err) {
-      setError('Failed to load customers. Please check your API connection.');
+      setError('Failed to load customers. Please check your connection.');
       console.error('Error loading customers:', err);
     } finally {
       setLoading(false);
@@ -196,7 +203,13 @@ function App() {
     }
   };
 
-  if (loading) {
+  // Show authentication page if not authenticated
+  if (!isAuthenticated && !authLoading) {
+    return <AuthPage />;
+  }
+
+  // Show loading while checking authentication
+  if (authLoading) {
     return (
       <div className="loading-container">
         <div className="loading-spinner">Loading...</div>
@@ -204,6 +217,16 @@ function App() {
     );
   }
 
+  // Show loading while fetching data
+  if (loading) {
+    return (
+      <div className="loading-container">
+        <div className="loading-spinner">Loading your data...</div>
+      </div>
+    );
+  }
+
+  // Show error state
   if (error) {
     return (
       <div className="error-container">
@@ -218,48 +241,68 @@ function App() {
     );
   }
 
+  // Main app content for authenticated users
   return (
     <Router>
       <div className="App">
         <NavigationBar />
         <main className="main-content">
           <Routes>
-            <Route path="/" element={<Navigate to="/customers" replace />} />
+            {/* Redirect to dashboard after login */}
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            <Route 
+              path="/dashboard" 
+              element={
+                <ProtectedRoute>
+                  <Dashboard 
+                    customers={customers}
+                    transactions={transactions}
+                  />
+                </ProtectedRoute>
+              } 
+            />
             <Route 
               path="/customers" 
               element={
-                <CustomerList 
-                  customers={customers}
-                  onAddCustomer={addCustomer}
-                  onUpdateCustomer={updateCustomer}
-                  onDeleteCustomer={deleteCustomer}
-                />
+                <ProtectedRoute>
+                  <CustomerList 
+                    customers={customers}
+                    onAddCustomer={addCustomer}
+                    onUpdateCustomer={updateCustomer}
+                    onDeleteCustomer={deleteCustomer}
+                  />
+                </ProtectedRoute>
               } 
             />
             <Route 
               path="/customer/:id" 
               element={
-                <CustomerDetail 
-                  customers={customers}
-                  transactions={transactions}
-                  onAddTransaction={addTransaction}
-                  onMarkAsPaid={markAsPaid}
-                  onUpdateCustomer={updateCustomer}
-                />
-              } 
-            />
-            <Route 
-              path="/dashboard" 
-              element={
-                <Dashboard 
-                  customers={customers}
-                  transactions={transactions}
-                />
+                <ProtectedRoute>
+                  <CustomerDetail 
+                    customers={customers}
+                    transactions={transactions}
+                    onAddTransaction={addTransaction}
+                    onMarkAsPaid={markAsPaid}
+                    onUpdateCustomer={updateCustomer}
+                  />
+                </ProtectedRoute>
               } 
             />
             <Route 
               path="/settings" 
-              element={<Settings />} 
+              element={
+                <ProtectedRoute>
+                  <Settings />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/profile" 
+              element={
+                <ProtectedRoute>
+                  <Settings />
+                </ProtectedRoute>
+              } 
             />
           </Routes>
         </main>
@@ -268,4 +311,14 @@ function App() {
   );
 }
 
+// Root App Component with AuthProvider
+function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
+  );
+}
+
 export default App;
+

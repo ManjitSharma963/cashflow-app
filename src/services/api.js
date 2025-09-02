@@ -1,11 +1,197 @@
 const API_BASE_URL = 'http://localhost:8080/api';
 
+// Authentication API endpoints
+export const authAPI = {
+  // User login
+  login: async (credentials) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: credentials.email,
+          password: credentials.password
+        }),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      // Store token in localStorage
+      if (data.token) {
+        localStorage.setItem('authToken', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('Error during login:', error);
+      throw error;
+    }
+  },
+
+  // User registration
+  register: async (userData) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: userData.name,
+          email: userData.email,
+          password: userData.password,
+          shopName: userData.shopName,
+          mobile: userData.mobile,
+        }),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      // Store token in localStorage
+      if (data.token) {
+        localStorage.setItem('authToken', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('Error during registration:', error);
+      throw error;
+    }
+  },
+
+  // Get current user profile
+  getProfile: async () => {
+    try {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+
+      const response = await fetch(`${API_BASE_URL}/auth/profile`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+      throw error;
+    }
+  },
+
+  // Update user profile
+  updateProfile: async (userData) => {
+    try {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+
+      const response = await fetch(`${API_BASE_URL}/auth/profile`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(userData),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const updatedUser = await response.json();
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      
+      return updatedUser;
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      throw error;
+    }
+  },
+
+  // Logout user
+  logout: async () => {
+    try {
+      const token = localStorage.getItem('authToken');
+      
+      if (token) {
+        // Optional: Call logout endpoint on server
+        await fetch(`${API_BASE_URL}/auth/logout`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          },
+        });
+      }
+    } catch (error) {
+      console.error('Error during logout:', error);
+    } finally {
+      // Always clear local storage
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('user');
+    }
+  },
+
+  // Check if user is authenticated
+  isAuthenticated: () => {
+    const token = localStorage.getItem('authToken');
+    const user = localStorage.getItem('user');
+    return !!(token && user);
+  },
+
+  // Get current user from localStorage
+  getCurrentUser: () => {
+    const userStr = localStorage.getItem('user');
+    return userStr ? JSON.parse(userStr) : null;
+  },
+
+  // Get auth token
+  getToken: () => {
+    return localStorage.getItem('authToken');
+  }
+};
+
+// Helper function to add auth headers to requests
+const getAuthHeaders = () => {
+  const token = authAPI.getToken();
+  return token ? {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${token}`
+  } : {
+    'Content-Type': 'application/json'
+  };
+};
+
 // Customer API endpoints
 export const customerAPI = {
   // Get all customers
   getAllCustomers: async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/customers`);
+      const response = await fetch(`${API_BASE_URL}/customers`, {
+        headers: getAuthHeaders()
+      });
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -19,7 +205,9 @@ export const customerAPI = {
   // Get customer by ID
   getCustomerById: async (id) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/customers/${id}`);
+      const response = await fetch(`${API_BASE_URL}/customers/${id}`, {
+        headers: getAuthHeaders()
+      });
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -35,9 +223,7 @@ export const customerAPI = {
     try {
       const response = await fetch(`${API_BASE_URL}/customers`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify({
           name: customerData.name,
           mobile: customerData.mobile,
@@ -65,9 +251,7 @@ export const customerAPI = {
     try {
       const response = await fetch(`${API_BASE_URL}/customers/${id}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify({
           name: customerData.name,
           mobile: customerData.mobile,
@@ -95,6 +279,7 @@ export const customerAPI = {
     try {
       const response = await fetch(`${API_BASE_URL}/customers/${id}`, {
         method: 'DELETE',
+        headers: getAuthHeaders()
       });
       
       if (!response.ok) {
@@ -113,9 +298,7 @@ export const customerAPI = {
     try {
       const response = await fetch(`${API_BASE_URL}/customers/${id}`, {
         method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify({
           totalDue: totalDue
         }),
@@ -137,9 +320,7 @@ export const customerAPI = {
     try {
       const response = await fetch(`${API_BASE_URL}/customers/${id}/total-due?totalDue=${totalDue}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: getAuthHeaders(),
       });
       
       if (!response.ok) {
@@ -158,9 +339,7 @@ export const customerAPI = {
     try {
       const response = await fetch(`${API_BASE_URL}/customers/${id}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify(updateData),
       });
       
@@ -180,9 +359,7 @@ export const customerAPI = {
     try {
       const response = await fetch(`${API_BASE_URL}/customers/${id}`, {
         method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify(updateData),
       });
       
@@ -212,7 +389,9 @@ export const transactionAPI = {
       if (filters.endDate) queryParams.append('endDate', filters.endDate);
       
       const url = `${API_BASE_URL}/transactions${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
-      const response = await fetch(url);
+      const response = await fetch(url, {
+        headers: getAuthHeaders()
+      });
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -227,7 +406,9 @@ export const transactionAPI = {
   // Get transaction by ID
   getTransactionById: async (id) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/transactions/${id}`);
+      const response = await fetch(`${API_BASE_URL}/transactions/${id}`, {
+        headers: getAuthHeaders()
+      });
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -243,9 +424,7 @@ export const transactionAPI = {
     try {
       const response = await fetch(`${API_BASE_URL}/transactions`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify({
           customerId: transactionData.customerId,
           customerName: transactionData.customerName,
@@ -275,9 +454,7 @@ export const transactionAPI = {
     try {
       const response = await fetch(`${API_BASE_URL}/transactions/${id}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify({
           customerId: transactionData.customerId,
           customerName: transactionData.customerName,
@@ -307,6 +484,7 @@ export const transactionAPI = {
     try {
       const response = await fetch(`${API_BASE_URL}/transactions/${id}`, {
         method: 'DELETE',
+        headers: getAuthHeaders()
       });
       
       if (!response.ok) {
@@ -325,6 +503,7 @@ export const transactionAPI = {
     try {
       const response = await fetch(`${API_BASE_URL}/transactions/${id}/mark-paid?status=${status}`, {
         method: 'POST',
+        headers: getAuthHeaders()
       });
       
       if (!response.ok) {
@@ -341,7 +520,9 @@ export const transactionAPI = {
   // Get transactions for a specific customer
   getCustomerTransactions: async (customerId) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/transactions/customer/${customerId}`);
+      const response = await fetch(`${API_BASE_URL}/transactions/customer/${customerId}`, {
+        headers: getAuthHeaders()
+      });
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -355,7 +536,9 @@ export const transactionAPI = {
   // Get pending transactions
   getPendingTransactions: async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/transactions/pending`);
+      const response = await fetch(`${API_BASE_URL}/transactions/pending`, {
+        headers: getAuthHeaders()
+      });
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -369,7 +552,9 @@ export const transactionAPI = {
   // Get overdue transactions
   getOverdueTransactions: async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/transactions/overdue`);
+      const response = await fetch(`${API_BASE_URL}/transactions/overdue`, {
+        headers: getAuthHeaders()
+      });
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -383,7 +568,9 @@ export const transactionAPI = {
   // Get daily sales transactions
   getDailySales: async (date) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/transactions/daily/sales?date=${date}`);
+      const response = await fetch(`${API_BASE_URL}/transactions/daily/sales?date=${date}`, {
+        headers: getAuthHeaders()
+      });
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -397,7 +584,9 @@ export const transactionAPI = {
   // Get daily cash transactions
   getDailyCash: async (date) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/transactions/daily/cash?date=${date}`);
+      const response = await fetch(`${API_BASE_URL}/transactions/daily/cash?date=${date}`, {
+        headers: getAuthHeaders()
+      });
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -411,7 +600,9 @@ export const transactionAPI = {
   // Get daily credit transactions
   getDailyCredit: async (date) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/transactions/daily/credit?date=${date}`);
+      const response = await fetch(`${API_BASE_URL}/transactions/daily/credit?date=${date}`, {
+        headers: getAuthHeaders()
+      });
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -425,7 +616,9 @@ export const transactionAPI = {
   // Get period sales transactions
   getPeriodSales: async (startDate, endDate) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/transactions/period/sales?startDate=${startDate}&endDate=${endDate}`);
+      const response = await fetch(`${API_BASE_URL}/transactions/period/sales?startDate=${startDate}&endDate=${endDate}`, {
+        headers: getAuthHeaders()
+      });
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -439,7 +632,9 @@ export const transactionAPI = {
   // Get period cash transactions
   getPeriodCash: async (startDate, endDate) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/transactions/period/cash?startDate=${startDate}&endDate=${endDate}`);
+      const response = await fetch(`${API_BASE_URL}/transactions/period/cash?startDate=${startDate}&endDate=${endDate}`, {
+        headers: getAuthHeaders()
+      });
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -453,7 +648,9 @@ export const transactionAPI = {
   // Get period credit transactions
   getPeriodCredit: async (startDate, endDate) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/transactions/period/credit?startDate=${startDate}&endDate=${endDate}`);
+      const response = await fetch(`${API_BASE_URL}/transactions/period/credit?startDate=${startDate}&endDate=${endDate}`, {
+        headers: getAuthHeaders()
+      });
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -469,9 +666,7 @@ export const transactionAPI = {
     try {
       const response = await fetch(`${API_BASE_URL}/customers/${customerId}/transactions`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify(transactionData),
       });
       
@@ -664,6 +859,7 @@ export const transactionAPI = {
 };
 
 export default {
+  authAPI,
   customerAPI,
   transactionAPI
 }; 
