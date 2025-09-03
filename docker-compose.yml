@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  # React Frontend
+  cashflow-app:
+    build:
+      context: .
+      target: production
+    container_name: cashflow-frontend
+    ports:
+      - "3000:80"
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Development version (uncomment to use)
+  # cashflow-dev:
+  #   build:
+  #     context: .
+  #     target: development
+  #   container_name: cashflow-dev
+  #   ports:
+  #     - "3000:3000"
+  #   volumes:
+  #     - .:/app
+  #     - /app/node_modules
+  #   environment:
+  #     - CHOKIDAR_USEPOLLING=true
+  #     - WATCHPACK_POLLING=true
+  #   restart: unless-stopped 
